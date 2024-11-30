@@ -375,7 +375,8 @@ int main()
                     break;
 
                     default:
-                    break;
+                        cout << "How did you even get here????";
+                        break;
                     }
                     break;
 
@@ -402,7 +403,7 @@ int main()
                         {
                             coutFancy("PATIENT NOT FOUND");
                         }
-                        askToContinue();
+
                         break;
 
                     case 2:
@@ -421,7 +422,7 @@ int main()
                         {
                             coutFancy("FAMILY MEMBER NOT FOUND");
                         }
-                        askToContinue();
+                        
                         break;
 
                     case 3:
@@ -441,19 +442,19 @@ int main()
                             coutFancy("THERAPIST NOT FOUND");
                         }
 
-                        askToContinue();
-                        
                     break;
                     
                     default:
-                    break;
+                        cout << "How did you even get here??????";
+                        break;
                     }
+
+                    askToContinue();
                     break;
 
                 // displays list of all users 
                 case 4:
                     displayList(usernamesP,  usernamesPF, usernamesT, MAX_PATIENT);
-                    askToContinue();
                     break;
 
                 // allows admin to see general trends
@@ -466,14 +467,13 @@ int main()
                     }
 
                     cout << "\n\n";
-                    askToContinue();
                     break;
 
                 // alllows admin to contact therapist
                 case 6:
                     noteToTherapist[loginIndexA] = getAnote();
+                    coutFancy("Note successfully sent to therapist");
 
-                    askToContinue();
                     break;
 
                 // just to alleviate some stress
@@ -482,21 +482,22 @@ int main()
                     cout << "MASH BUTTINS TO YOUR HEARTH'S CONTENT!!!! (press enter to exit):";
                     getline(cin, StressRelief);
                     cin.ignore(1000, '\n');
-                    askToContinue();
+
                     break;
                 
                 case 0:
                 
                     coutFancy("ADMIN LOGGED OUT");
-                    askToContinue();
                     break;
 
                 default:
 
                     cout << "Invalid choice!!!";
-                    askToContinue();
                     break;
                 }
+
+                askToContinue();
+                 
             } while (input != 0);
             input = -1; //this statment is to make sure that do not exit from outer loop
         }
@@ -515,13 +516,11 @@ int main()
                     noteToTherapist[loginIndexP] = getAnote();
                     patientPriority[loginIndexP] = checkPriority();
 
-                    askToContinue();
                     break;
                 case 2:
                     coutFancy("NOTE TO FAMILY");
                     noteToFamily[loginIndexP] = getAnote();
 
-                    askToContinue();
                     break;
                 case 3:
                     coutFancy("BOOK SESSION");
@@ -529,7 +528,6 @@ int main()
 
                     coutFancy("SESSION BOOKED SUCCESSFULLY");
 
-                    askToContinue();
                     break;
                 case 4:
                     coutFancy("ADD GOALS");
@@ -549,8 +547,6 @@ int main()
                     if(!goalAdded)
                         cout << "No room for more goals. Please complete one of the existing goals first \n";
 
-                        askToContinue();
-
                     break;
                 
                 case 5:
@@ -563,7 +559,6 @@ int main()
                         }
                     }
 
-                    askToContinue();
                     break;
                 
                 case 6:
@@ -580,17 +575,20 @@ int main()
 
                     patientGoals[loginIndexP][userUpdatingIndex - 1] = "";
                     coutFancy("GOAL COMPLETED!!");
-                    askToContinue();
                     break;
                 
                 case 0:
-                    cout << "You are logged out" << endl;
+                    coutFancy("LOGGED OUT");
+                    cout << endl << endl;
+
                     break;
 
                 default:
                     cout << "Invalid choice!!!";
                     break;
                 }
+
+                askToContinue();
 
             } while (input != 0);
             input = -1; //this statment is to make sure that do not exit from outer loop
@@ -615,7 +613,7 @@ int main()
                     }
 
                     cout << usernamesP[loginIndexPF] << ": " << noteToFamily[loginIndexPF];
-                    askToContinue();
+
                     break;
                 case 2:
                     coutFancy("THERAPIST NOTES");
@@ -628,25 +626,27 @@ int main()
                         cout << "Therapist: ";
                         cout << patientReview[loginIndexPF];
                     }
-                    askToContinue();
+
                     break;
-                case 3: // DO ALL IN A FUNCTION (SMOL)
+                case 3: 
                     coutFancy("BOOK SESSION");
                     sessionDates[loginIndexPF] = dateVerify();
 
                     coutFancy("SESSION BOOKED SUCCESSFULLY");
-                    askToContinue();
 
                     break;
 
                 case 0:
-                    cout << "You are logged out" << endl;
+                    coutFancy("LOGGED OUT");
+                    cout << endl << endl;
                     break;
 
                 default:
                     cout << "Invalid choice!!!";
                     break;
                 }
+
+                askToContinue();
 
             } while (input != 0);
             input = -1; //this statment is to make sure that do not exit from outer loop
@@ -661,34 +661,30 @@ int main()
                 {
 
                 case 1:
-                    system("cls");
                     coutFancy("PRIORITY PATIENTS");
                     for(int i = 0; i < MAX_PATIENT; i++)
                     {
                         if(patientPriority[i] == 'y' || patientPriority[i] == 'Y')
                         {
-                            cout << "\t" << usernamesP[i];
+                            cout << "\n" << usernamesP[i];
                         }
 
                     }
-                    askToContinue();
 
                     break;
                 case 2:
-                    system("cls");
                     coutFancy("ALL PATIENTS");
                     for(int i = 0; i < MAX_PATIENT; i++)
                     {
                         if(usernamesP[i] != "")
                         {
-                            cout << "\t" << usernamesP[i];
+                            cout << "\n" << usernamesP[i];
                         }
 
                     }
-                    askToContinue();
+
                     break;
                 case 3:
-                    system("cls");
                     coutFancy("SESSION REVIEW");
                     userUpdatingIndex = 0;
                     cout << "\tAdd info of patient\n ";
@@ -705,45 +701,44 @@ int main()
                         cout << "User not found. Please Contact Admin for help";
                     }
 
-                    askToContinue();
                     break;
                 case 4:
-                    system("cls");
                     coutFancy("PATIENT FEEDBACK");
                     cout << "\t" << usernamesP[loginIndexT] << '\t' << noteToTherapist[loginIndexT];
-                    askToContinue();
                     break;
                 case 5:
-                    system("cls");
                     coutFancy("CONTACT PATIENT");
                     cout << "\n\tEnter message: ";
                     getline(cin,noteToPatient[loginIndexT]);
                     cin.ignore(50, '\n');
 
-                    askToContinue();
                     break;
 
                 case 6:
-                    system("cls");
                     coutFancy("BOOKED SESSIONS");
+                    cout << "\n\n";
                     cout << "***********************************************************************************************************************\n";
-                    cout << setw(50) << " " << setw(50) << left << "Session" << setw(50) << left << "Date\n";
+                    cout << setw(10) << "" << setw(30) << left << "Session" << setw(30) << left << "Date" << endl;
                     cout << "***********************************************************************************************************************\n";
 
                     if(sessionDates[loginIndexT] != "")
                     {
-                        cout << setw(50) << " " << setw(50) << left << usernamesP[loginIndexT] 
-                             << setw(50) << left << sessionDates[loginIndexT] << '\n';
+                        cout << setw(10) << " " << setw(30) << left << usernamesP[loginIndexT] 
+                             << setw(30) << left << sessionDates[loginIndexT] << '\n';
                     }
+
                     break;
                 case 0:
-                    coutFancy("THERAPIST LOGGED OUT");
+                    coutFancy("LOGGED OUT");
+                    cout << endl << endl;
                     break;
 
                 default:
                     cout << "Invalid choice!!!";
                     break;
                 }
+
+                askToContinue();
 
             } while (input != 0);
             input = -1; //this statment is to make sure that do not exit from outer loop
@@ -946,6 +941,7 @@ int getTherapistInput(void)
 
     cout << left << setw(10) << "\t"
             << setw(30) << "5. Contact Patient"
+            << setw(30) << "6. Booked Sessions"
             << setw(30) << "0. Logout";
     cout << '\n';
 
@@ -954,7 +950,7 @@ int getTherapistInput(void)
 
     cout << "Enter choice: ";
     cin >> checkValid;
-    therapistChoice = choiceValidatoin(checkValid, '0' , '5');
+    therapistChoice = choiceValidatoin(checkValid, '0' , '6');
 
     return therapistChoice;
 
@@ -1221,7 +1217,7 @@ void saveData(
     fout.close();
 
     fout.open("Client's Family.csv");
-    fout << "Family Member "<< "," << "Password "  << "," << "Note by Therapist" << '\n';
+    fout << "Family Member "<< "," << "Password "  << "," << "Note by Patient" << '\n';
     for (int i = 0; i < maxFamily; i++) 
     {
         fout << usernamesPF[i] << "," << passwordsPF[i] << "," << noteToFamily[i] << '\n' ;
