@@ -6,19 +6,46 @@
 #include <fstream>
 using namespace std;
 
+// MAX number of each user type
+const int MAX_CLIENTS   = 20;  
+const int MAX_FAMILY    = 20;
+const int MAX_COUNSELOR = 20; 
+const int MAX_GOALS_PER_CLIENT = 5;
+
+struct patient
+{
+    
+    char patientPriority;
+    string patientReview;
+    string usernameP;
+    string passwordsP;
+    string noteToPatient;
+    string patientGoals[MAX_GOALS_PER_CLIENT];
+};
+
+struct family
+{              
+    string usernamePF;
+    string passwordsPF;
+    string noteToFamily;
+
+};
+
+struct therapist
+{
+    string usernamesT;
+    string passwordsT;
+    string sessionDates;
+    string noteToTherapist;
+
+};
 
 // Frequently used aesthetic functions
 void printHeader(void);
 void coutFancy(string fancy);
 void askToContinue(void);
 
-
-void initializeArrays(
-    int patient[], char patientPriority[], string patientReview[], string usernamesP[], string passwordsP[], string patientGoals[][5], 
-    int familyMember[], string usernamesPF[], string passwordsPF[], string noteToPatient[], string noteToFamily[], 
-    int therapist[], string usernamesT[], string passwordsT[], string sessionDates[], string noteToTherapist[], 
-    int maxPatient, int maxFamily, int maxTherapist, int maxGoals
-);
+void initializeArrays(patient clients[], family familyMember[], therapist counselor[]);
 
 // Functions related to getting valid choices as input from user
 int choiceValidatoin(string choice, char start, char end);
@@ -35,61 +62,31 @@ string getPassword(void);
 string getAnote(void);
 char checkPriority(void);
 
-
 // Functions about searching and displaying data
-bool searchUser(string username, int maxUsers, string usernameList[], int &reqUserIndex );
-void displayList(string usersArrayP[], string usersArrayPF[], string usersArrayT[], int maxUsers);
+bool searchUser(string username, int maxUsers, patient clients[], int &reqUserIndex );
+bool searchUser(string username, int maxUsers, family familyMember[], int &reqUserIndex );
+bool searchUser(string username, int maxUsers, therapist counselor[], int &reqUserIndex );
+void displayList(patient clients[], family familyMember[], therapist counselor[], int maxUsers);
 
 // Functions about file handling
-void saveData(
-    int patient[], char patientPriority[], string patientReview[], string usernamesP[], string passwordsP[], string patientGoals[][5], 
-    int familyMember[], string usernamesPF[], string passwordsPF[], string noteToPatient[], string noteToFamily[], 
-    int therapist[], string usernamesT[], string passwordsT[], string sessionDates[], string noteToTherapist[], 
-    int maxPatient, int maxFamily, int maxTherapist, int MAX_GOALS_PER_PERSON
-);
-void loadData(
-    int patient[], char patientPriority[], string patientReview[], string usernamesP[], string passwordsP[], string patientGoals[][5], 
-    int familyMember[], string usernamesPF[], string passwordsPF[], string noteToPatient[], string noteToFamily[], 
-    int therapist[], string usernamesT[], string passwordsT[], string sessionDates[], string noteToTherapist[], 
-    int maxPatient, int maxFamily, int maxTherapist, int maxGoals
-);
+void saveData (patient clients[], family familyMember[], therapist counselor[]);;
+
+void loadData(patient clients[], family familyMember[], therapist counselor[]);;
+
 
 int main()
 {
 
-    // MAX number of each user type
-    const int MAX_THERAPIST = 20; 
-    const int MAX_PATIENT   = 20;  
-    const int MAX_FAMILY    = 20;
-    const int MAX_GOALS_PER_PERSON = 5;
 
     const string ADMIN_USERNAME = "TPS";
     const string ADMIN_PASSWORD = "TPSTPS909";
 
 
-    // patient arrays
-    int patient[MAX_PATIENT];
-    char patientPriority[MAX_PATIENT];
-    string patientReview[MAX_PATIENT];
-    string usernamesP[MAX_PATIENT];
-    string passwordsP[MAX_PATIENT];
-    string patientGoals[MAX_PATIENT][MAX_GOALS_PER_PERSON];
-
-    // family arrays
-    int familyMember[MAX_FAMILY];                 
-    string usernamesPF[MAX_FAMILY];
-    string passwordsPF[MAX_FAMILY];
-    string noteToPatient[MAX_PATIENT];
-    string noteToFamily[MAX_FAMILY];
-
-
-    // therapist arrays
-    int therapist[MAX_THERAPIST];
-    string usernamesT[MAX_THERAPIST];
-    string passwordsT[MAX_THERAPIST];
-    string sessionDates[MAX_THERAPIST];
-    string noteToTherapist[MAX_THERAPIST];
-
+    // user structs
+    patient clients[MAX_CLIENTS];
+    family familyMember[MAX_FAMILY];
+    therapist counselors[MAX_COUNSELOR];
+    
 
     // users search flags
     bool therapistFlag = false;
@@ -115,15 +112,12 @@ int main()
     bool goalAdded = false;
     int loggedInUserType = -10; //1 for administrator, 2 for client, 3 for client's family, 4 for Therapist, -10 when user logs out
     
+
     //initializing all arrays 
-    initializeArrays(patient, patientPriority, patientReview, usernamesP, passwordsP, patientGoals, 
-                    familyMember, usernamesPF, passwordsPF, noteToPatient, noteToFamily, therapist, 
-                    usernamesT, passwordsT, sessionDates, noteToTherapist, MAX_PATIENT, MAX_FAMILY, MAX_THERAPIST, MAX_GOALS_PER_PERSON);
+    initializeArrays(clients, familyMember, counselors);
 
     // loading the data into the arrays
-    loadData(patient, patientPriority, patientReview, usernamesP, passwordsP, patientGoals, 
-            familyMember, usernamesPF, passwordsPF, noteToPatient, noteToFamily, therapist, 
-            usernamesT, passwordsT, sessionDates, noteToTherapist, MAX_PATIENT, MAX_FAMILY, MAX_THERAPIST,MAX_GOALS_PER_PERSON);
+    loadData(clients, familyMember, counselors);
     
     // starting main execution
     do
@@ -151,11 +145,11 @@ int main()
             user = getUsername();
             pwd  = getPassword();
 
-            patientFlag = searchUser(user, MAX_PATIENT, usernamesP, loginIndexP);
+            patientFlag = searchUser(user, MAX_CLIENTS, clients, loginIndexP);
 
             if (patientFlag == true)
             {
-                if(pwd == passwordsP[loginIndexP])
+                if(pwd == clients[loginIndexP].passwordsP)
                 {
                     loggedInUserType = 2;
 
@@ -174,11 +168,11 @@ int main()
             user = getUsername();
             pwd  = getPassword();
 
-            familyFlag = searchUser(user, MAX_FAMILY, usernamesPF, loginIndexPF);
+            familyFlag = searchUser(user, MAX_FAMILY, familyMember, loginIndexPF);
 
             if (familyFlag == true)
             {
-                if(pwd == passwordsPF[loginIndexPF])
+                if(pwd == familyMember[loginIndexPF].passwordsPF)
                 {
                     loggedInUserType = 3;
 
@@ -198,11 +192,11 @@ int main()
             user = getUsername();
             pwd  = getPassword();
 
-            therapistFlag = searchUser(user, MAX_THERAPIST, usernamesT, loginIndexT);
+            therapistFlag = searchUser(user, MAX_COUNSELOR, counselors, loginIndexT);
 
             if (therapistFlag == true)
             {
-                if(pwd == passwordsT[loginIndexT])
+                if(pwd == counselors[loginIndexT].passwordsT)
                 {
                     loggedInUserType = 4;
 
@@ -245,11 +239,11 @@ int main()
                     case 1:
 
                         userUpdatingIndex = 0;
-                        userFound = searchUser(emptyUser, MAX_PATIENT, usernamesP, userUpdatingIndex);
+                        userFound = searchUser(emptyUser, MAX_CLIENTS, clients, userUpdatingIndex);
                         if(userFound)
                         {
-                            usernamesP[userUpdatingIndex] = getUsername();
-                            passwordsP[userUpdatingIndex] = getPassword();
+                            clients[userUpdatingIndex].usernameP = getUsername();
+                            clients[userUpdatingIndex].passwordsP = getPassword();
 
                             coutFancy("PATIENT ADDED SUCCESSFULLY");      
                         }
@@ -262,11 +256,11 @@ int main()
 
                     case 2:
                         userUpdatingIndex = 0;
-                        userFound = searchUser(emptyUser, MAX_FAMILY, usernamesPF, userUpdatingIndex);
+                        userFound = searchUser(emptyUser, MAX_FAMILY, familyMember, userUpdatingIndex);
                         if(userFound)
                         {
-                            usernamesPF[userUpdatingIndex] = getUsername();
-                            passwordsPF[userUpdatingIndex] = getPassword();
+                            familyMember[userUpdatingIndex].usernamePF = getUsername();
+                            familyMember[userUpdatingIndex].passwordsPF = getPassword();
 
                             coutFancy("FAMILY MEMBER ADDED SUCCESSFULLY");
                         }
@@ -280,11 +274,11 @@ int main()
 
                     case 3:
                         userUpdatingIndex = 0;
-                        userFound = searchUser(emptyUser, MAX_PATIENT, usernamesT, userUpdatingIndex);
+                        userFound = searchUser(emptyUser, MAX_CLIENTS, counselors, userUpdatingIndex);
                         if(userFound)
                         {
-                            usernamesT[userUpdatingIndex] = getUsername();
-                            passwordsT[userUpdatingIndex] = getPassword();
+                            counselors[userUpdatingIndex].usernamesT = getUsername();
+                            counselors[userUpdatingIndex].passwordsT = getPassword();
 
                             coutFancy("THERAPIST ADDED SUCCESSFULLY");
                             
@@ -313,34 +307,33 @@ int main()
                         userUpdatingIndex = 0;
                         reqUser = getUsername();
 
-                        userFound = searchUser(reqUser, MAX_PATIENT, usernamesP, userUpdatingIndex);
+                        userFound = searchUser(reqUser, MAX_CLIENTS, clients, userUpdatingIndex);
                         if(userFound)
                         {
                             cout << "Enter New Credentials \n";
-                            usernamesP[userUpdatingIndex] = getUsername();
-                            passwordsP[userUpdatingIndex] = getPassword();
+                            clients[userUpdatingIndex].usernameP = getUsername();
+                            clients[userUpdatingIndex].passwordsP = getPassword();
 
                             coutFancy("PATIENT UPDATED SUCCESSFULLY");
-                            askToContinue(); 
                             
                         }
                         else
                         {
                             coutFancy("PATIENT NOT FOUND");
-                            askToContinue();       
                         }
+                        askToContinue();       
                         break;
 
                     case 2:
                         userUpdatingIndex = 0;
                         reqUser = getUsername();
 
-                        userFound = searchUser(reqUser, MAX_FAMILY, usernamesPF, userUpdatingIndex);
+                        userFound = searchUser(reqUser, MAX_FAMILY, familyMember, userUpdatingIndex);
                         if(userFound)
                         {
                             cout << "Enter new Credentials \n";
-                            usernamesPF[userUpdatingIndex] = getUsername();
-                            passwordsPF[userUpdatingIndex] = getPassword();
+                            familyMember[userUpdatingIndex].usernamePF = getUsername();
+                            familyMember[userUpdatingIndex].passwordsPF = getPassword();
 
                             coutFancy("FAMILY MEMBER UPDATED SUCCESSFULLY");
                             
@@ -357,12 +350,12 @@ int main()
                         userUpdatingIndex = 0;
                         reqUser = getUsername();
 
-                        userFound = searchUser(reqUser, MAX_PATIENT, usernamesT, userUpdatingIndex);
+                        userFound = searchUser(reqUser, MAX_CLIENTS, counselors, userUpdatingIndex);
                         if(userFound)
                         {
                             cout << "Enter new Credentials \n";
-                            usernamesT[userUpdatingIndex] = getUsername();
-                            passwordsT[userUpdatingIndex] = getPassword();
+                            counselors[userUpdatingIndex].usernamesT = getUsername();
+                            counselors[userUpdatingIndex].passwordsT = getPassword();
 
                             coutFancy("THERAPIST ADDED SUCCESSFULLY");    
                         }
@@ -391,11 +384,11 @@ int main()
                         userUpdatingIndex = 0;
                         reqUser = getUsername();
 
-                        userFound = searchUser(reqUser, MAX_PATIENT, usernamesP, userUpdatingIndex);
+                        userFound = searchUser(reqUser, MAX_CLIENTS, clients, userUpdatingIndex);
                         if(userFound)
                         {
-                            usernamesP[userUpdatingIndex] = emptyUser;
-                            passwordsP[userUpdatingIndex] = emptyPwd;
+                            clients[userUpdatingIndex].usernameP = emptyUser;
+                            clients[userUpdatingIndex].passwordsP = emptyPwd;
 
                             coutFancy("PATIENT DELETED SUCCESSFULLY");
                         }
@@ -410,11 +403,11 @@ int main()
                         userUpdatingIndex = 0;
                         reqUser = getUsername();
 
-                        userFound = searchUser(reqUser, MAX_FAMILY, usernamesPF, userUpdatingIndex);
+                        userFound = searchUser(reqUser, MAX_FAMILY, familyMember, userUpdatingIndex);
                         if(userFound)
                         {
-                            usernamesPF[userUpdatingIndex] = emptyUser;
-                            passwordsPF[userUpdatingIndex] = emptyPwd;
+                            familyMember[userUpdatingIndex].usernamePF = emptyUser;
+                            familyMember[userUpdatingIndex].passwordsPF = emptyPwd;
 
                             coutFancy("FAMILY MEMBER DELETED SUCCESSFULLY");
                         }
@@ -429,11 +422,11 @@ int main()
                         userUpdatingIndex = 0;
                         reqUser = getUsername();
 
-                        userFound = searchUser(reqUser, MAX_PATIENT, usernamesT, userUpdatingIndex);
+                        userFound = searchUser(reqUser, MAX_CLIENTS, counselors, userUpdatingIndex);
                         if(userFound)
                         {
-                            usernamesT[userUpdatingIndex] = emptyUser;
-                            passwordsT[userUpdatingIndex] = emptyPwd;
+                            counselors[userUpdatingIndex].usernamesT = emptyUser;
+                            counselors[userUpdatingIndex].passwordsT = emptyPwd;
 
                             coutFancy("THERAPIST DELETED SUCCESSFULLY");
                         }
@@ -454,16 +447,16 @@ int main()
 
                 // displays list of all users 
                 case 4:
-                    displayList(usernamesP,  usernamesPF, usernamesT, MAX_PATIENT);
+                    displayList(clients,  familyMember, counselors, MAX_CLIENTS);
                     break;
 
                 // allows admin to see general trends
                 case 5:
                     coutFancy("GENERAL TRENDS");
                     cout << setw(50) << "PATIENTS" << setw(50) << "PRIORITY?" << '\n';
-                    for(int i = 0; i < MAX_PATIENT; i++)
+                    for(int i = 0; i < MAX_CLIENTS; i++)
                     {
-                        cout << setw(50) << usernamesP[i] << setw(50) << patientPriority[i] << '\n';
+                        cout << setw(50) << clients[i].usernameP << setw(50) << clients[i].patientPriority << '\n';
                     }
 
                     cout << "\n\n";
@@ -471,7 +464,7 @@ int main()
 
                 // alllows admin to contact therapist
                 case 6:
-                    noteToTherapist[loginIndexA] = getAnote();
+                    counselors[loginIndexA].noteToTherapist = getAnote();
                     coutFancy("Note successfully sent to therapist");
 
                     break;
@@ -513,31 +506,31 @@ int main()
 
                 case 1:
                     coutFancy("NOTE TO THERAPIST");
-                    noteToTherapist[loginIndexP] = getAnote();
-                    patientPriority[loginIndexP] = checkPriority();
+                    counselors[loginIndexP].noteToTherapist = getAnote();
+                    clients[loginIndexP].patientPriority = checkPriority();
 
                     break;
                 case 2:
                     coutFancy("NOTE TO FAMILY");
-                    noteToFamily[loginIndexP] = getAnote();
+                    familyMember[loginIndexP].noteToFamily = getAnote();
 
                     break;
                 case 3:
                     coutFancy("BOOK SESSION");
-                    sessionDates[loginIndexPF] = dateVerify();
+                    counselors[loginIndexPF].sessionDates = dateVerify();
 
                     coutFancy("SESSION BOOKED SUCCESSFULLY");
 
                     break;
                 case 4:
                     coutFancy("ADD GOALS");
-                    for(int i = 0; i < MAX_GOALS_PER_PERSON; i++)
+                    for(int i = 0; i < MAX_GOALS_PER_CLIENT; i++)
                     {
-                        if(patientGoals[loginIndexP][i] == "")
+                        if(clients[loginIndexP].patientGoals[i] == "")
                         {
                             cout << "Enter new goal(only keywords if possible): ";
                             cin.ignore();
-                            getline(cin, patientGoals[loginIndexP][i]);
+                            getline(cin, clients[loginIndexP].patientGoals[i]);
                             goalAdded = true;
 
                             break;
@@ -551,11 +544,11 @@ int main()
                 
                 case 5:
                     coutFancy("CURRENT GOALS");
-                    for(int i = 0; i < MAX_GOALS_PER_PERSON; i++)
+                    for(int i = 0; i < MAX_GOALS_PER_CLIENT; i++)
                     {
-                        if(patientGoals[loginIndexP][i] != "")
+                        if(clients[loginIndexP].patientGoals[i] != "")
                         {
-                            cout << '\t'  << i+1 << ". " << patientGoals[loginIndexP][i] << '\n';
+                            cout << '\t'  << i+1 << ". " << clients[loginIndexP].patientGoals[i] << '\n';
                         }
                     }
 
@@ -563,17 +556,17 @@ int main()
                 
                 case 6:
                     coutFancy("REMOVE COMPLETED GOALS");
-                    for(int i = 0; i < MAX_GOALS_PER_PERSON; i++)
+                    for(int i = 0; i < MAX_GOALS_PER_CLIENT; i++)
                     {
-                        if(patientGoals[loginIndexP][i] != "")
+                        if(clients[loginIndexP].patientGoals[i] != "")
                         {
-                            cout << '\t'  << i+1 << ". " << patientGoals[loginIndexP][i] << '\n';
+                            cout << '\t'  << i+1 << ". " << clients[loginIndexP].patientGoals[i] << '\n';
                         }
                     }
                     cout << "Enter index to complete: ";
                     cin  >> userUpdatingIndex;
 
-                    patientGoals[loginIndexP][userUpdatingIndex - 1] = "";
+                    clients[loginIndexP].patientGoals[userUpdatingIndex - 1] = "";
                     coutFancy("GOAL COMPLETED!!");
                     break;
                 
@@ -603,7 +596,7 @@ int main()
                 {
 
                 case 1:
-                    if(patientPriority[loginIndexPF] == 'y' || patientPriority[loginIndexPF] == 'Y')
+                    if(clients[loginIndexPF].patientPriority == 'y' || clients[loginIndexPF].patientPriority == 'Y')
                     {
                         coutFancy("PATIENT NEEDS HELP!!!");
                     }
@@ -612,25 +605,25 @@ int main()
                         coutFancy("PATIENT IS FINE(PROBABLY)");
                     }
 
-                    cout << usernamesP[loginIndexPF] << ": " << noteToFamily[loginIndexPF];
+                    cout << clients[loginIndexPF].usernameP << ": " << familyMember[loginIndexPF].noteToFamily;
 
                     break;
                 case 2:
                     coutFancy("THERAPIST NOTES");
-                    if(patientReview[loginIndexPF] == "")
+                    if(clients[loginIndexPF].patientReview == "")
                     {
                         cout << "No Review has been given by the therapist";
                     }
                     else
                     {
                         cout << "Therapist: ";
-                        cout << patientReview[loginIndexPF];
+                        cout << clients[loginIndexPF].patientReview;
                     }
 
                     break;
                 case 3: 
                     coutFancy("BOOK SESSION");
-                    sessionDates[loginIndexPF] = dateVerify();
+                    counselors[loginIndexPF].sessionDates = dateVerify();
 
                     coutFancy("SESSION BOOKED SUCCESSFULLY");
 
@@ -662,11 +655,11 @@ int main()
 
                 case 1:
                     coutFancy("PRIORITY PATIENTS");
-                    for(int i = 0; i < MAX_PATIENT; i++)
+                    for(int i = 0; i < MAX_CLIENTS; i++)
                     {
-                        if(patientPriority[i] == 'y' || patientPriority[i] == 'Y')
+                        if(clients[i].patientPriority == 'y' || clients[i].patientPriority == 'Y')
                         {
-                            cout << "\n" << usernamesP[i];
+                            cout << "\n" << clients[i].usernameP;
                         }
 
                     }
@@ -674,11 +667,11 @@ int main()
                     break;
                 case 2:
                     coutFancy("ALL PATIENTS");
-                    for(int i = 0; i < MAX_PATIENT; i++)
+                    for(int i = 0; i < MAX_CLIENTS; i++)
                     {
-                        if(usernamesP[i] != "")
+                        if(clients[i].usernameP != "")
                         {
-                            cout << "\n" << usernamesP[i];
+                            cout << "\n" << clients[i].usernameP;
                         }
 
                     }
@@ -689,12 +682,12 @@ int main()
                     userUpdatingIndex = 0;
                     cout << "\tAdd info of patient\n ";
                     user = getUsername();
-                    searchUser(user, MAX_PATIENT, usernamesP, userUpdatingIndex);
+                    userFound = searchUser(user, MAX_CLIENTS, clients, userUpdatingIndex);
 
-                    if(searchUser)
+                    if(userFound)
                     {
-                        cout << "Enter review about " << usernamesP[userUpdatingIndex] << ":";
-                        getline(cin, patientReview[userUpdatingIndex]);
+                        cout << "Enter review about " << clients[userUpdatingIndex].usernameP << ":";
+                        getline(cin, clients[userUpdatingIndex].patientReview);
                     }
                     else
                     {
@@ -704,12 +697,12 @@ int main()
                     break;
                 case 4:
                     coutFancy("PATIENT FEEDBACK");
-                    cout << "\t" << usernamesP[loginIndexT] << '\t' << noteToTherapist[loginIndexT];
+                    cout << "\t" << clients[loginIndexT].usernameP << '\t' << counselors[loginIndexT].noteToTherapist;
                     break;
                 case 5:
                     coutFancy("CONTACT PATIENT");
                     cout << "\n\tEnter message: ";
-                    getline(cin,noteToPatient[loginIndexT]);
+                    getline(cin, clients[loginIndexT].noteToPatient);
                     cin.ignore(50, '\n');
 
                     break;
@@ -721,10 +714,10 @@ int main()
                     cout << setw(10) << "" << setw(30) << left << "Session" << setw(30) << left << "Date" << endl;
                     cout << "***********************************************************************************************************************\n";
 
-                    if(sessionDates[loginIndexT] != "")
+                    if(counselors[loginIndexT].sessionDates != "")
                     {
-                        cout << setw(10) << " " << setw(30) << left << usernamesP[loginIndexT] 
-                             << setw(30) << left << sessionDates[loginIndexT] << '\n';
+                        cout << setw(10) << " " << setw(30) << left << clients[loginIndexT].usernameP 
+                             << setw(30) << left << counselors[loginIndexT].sessionDates << '\n';
                     }
 
                     break;
@@ -750,9 +743,7 @@ int main()
         }
     } while (input != 0);
 
-    saveData(patient, patientPriority, patientReview, usernamesP, passwordsP, patientGoals, 
-            familyMember, usernamesPF, passwordsPF, noteToPatient, noteToFamily, therapist, 
-            usernamesT, passwordsT, sessionDates, noteToTherapist, MAX_PATIENT, MAX_FAMILY, MAX_THERAPIST, MAX_GOALS_PER_PERSON);
+    saveData(clients, familyMember, counselors);
 
     return 0;
 }
@@ -779,48 +770,39 @@ void coutFancy(string fancy)
 }
 
 // initializes all the arrays 
-void initializeArrays
-(
-    int patient[], char patientPriority[], string patientReview[], string usernamesP[], string passwordsP[], string patientGoals[][5], 
-    int familyMember[], string usernamesPF[], string passwordsPF[], string noteToPatient[], string noteToFamily[], 
-    int therapist[], string usernamesT[], string passwordsT[], string sessionDates[], string noteToTherapist[], 
-    int maxPatient, int maxFamily, int maxTherapist, int MAX_GOALS_PER_PERSON
-) 
+void initializeArrays(patient clients[], family familyMember[], therapist counselor[]) 
 {
-    for (int i = 0; i < maxPatient; i++) 
+    for (int i = 0; i < MAX_CLIENTS; i++) 
     {
-        patient[i] = 0;
-        patientPriority[i] = '\0';
-        patientReview[i] = "";
-        usernamesP[i] = "";
-        passwordsP[i] = "";
-        noteToPatient[i] = "";
+        clients[i].patientPriority = '\0';
+        clients[i].patientReview = "";
+        clients[i].usernameP = "";
+        clients[i].passwordsP = "";
+        clients[i].noteToPatient = "";
     }
 
-    for(int i = 0; i < maxPatient; i++)
+    for(int i = 0; i < MAX_CLIENTS; i++)
     {
-        for(int j = 0; j < MAX_GOALS_PER_PERSON; j++)
+        for(int j = 0; j < MAX_GOALS_PER_CLIENT; j++)
         {
-            patientGoals[i][j] = "";
+            clients[i].patientGoals[j] = "";
 
         }
     }
 
-    for (int i = 0; i < maxFamily; i++) 
+    for (int i = 0; i < MAX_FAMILY; i++) 
     {
-        familyMember[i] = 0;
-        usernamesPF[i] = "";
-        passwordsPF[i] = "";
-        noteToFamily[i] = "";
+        familyMember[i].usernamePF = "";
+        familyMember[i].passwordsPF = "";
+        familyMember[i].noteToFamily = "";
     }
 
-    for (int i = 0; i < maxTherapist; i++) 
+    for (int i = 0; i < MAX_COUNSELOR; i++) 
     {
-        therapist[i] = 0;
-        usernamesT[i] = "";
-        passwordsT[i] = "";
-        sessionDates[i] = "";
-        noteToTherapist[i] = "";
+        counselor[i].usernamesT = "";
+        counselor[i].passwordsT = "";
+        counselor[i].sessionDates = "";
+        counselor[i].noteToTherapist = "";
     }
 }
 
@@ -1059,13 +1041,51 @@ int getUserType(void)
     return userType;
 }
 
-// searches user in the array
-bool searchUser(string username, int maxUsers, string usernameList[], int &reqUserIndex)
+// searches client in the array
+bool searchUser(string username, int maxUsers, patient clients[] , int &reqUserIndex)
 {
     bool userSearchFlag = false;
     for (int i = 0; i < maxUsers; i++)
     {
-        if (username == usernameList[i])
+        if (username == clients[i].usernameP)
+        {
+            userSearchFlag = true;
+            reqUserIndex = i; // stores which user entered system
+            return userSearchFlag;
+        }
+
+        
+    }
+    return userSearchFlag;
+
+}
+
+// searches family member in the array
+bool searchUser(string username, int maxUsers, family familyMember[] , int &reqUserIndex)
+{
+    bool userSearchFlag = false;
+    for (int i = 0; i < maxUsers; i++)
+    {
+        if (username == familyMember[i].usernamePF)
+        {
+            userSearchFlag = true;
+            reqUserIndex = i; // stores which user entered system
+            return userSearchFlag;
+        }
+
+        
+    }
+    return userSearchFlag;
+
+}
+
+// searches therapist in the array
+bool searchUser(string username, int maxUsers, therapist counselor[] , int &reqUserIndex)
+{
+    bool userSearchFlag = false;
+    for (int i = 0; i < maxUsers; i++)
+    {
+        if (username == counselor[i].usernamesT)
         {
             userSearchFlag = true;
             reqUserIndex = i; // stores which user entered system
@@ -1079,7 +1099,7 @@ bool searchUser(string username, int maxUsers, string usernameList[], int &reqUs
 }
 
 // displays list of users
-void displayList(string usersArrayP[], string usersArrayPF[], string usersArrayT[], int maxUsers)
+void displayList(patient clients[], family familyMember[], therapist counselor[], int maxUsers)
 {
 
     cout << "*********************************************************************************"
@@ -1093,12 +1113,15 @@ void displayList(string usersArrayP[], string usersArrayPF[], string usersArrayT
            
     for (int i = 0; i < maxUsers; i++)
     {
-        if(usersArrayP[i] != "" || usersArrayPF[i] != "" || usersArrayT[i] != "")
+        if(clients[i].usernameP != "" || familyMember[i].usernamePF != "" || counselor[i].usernamesT != "")
         {
-            cout << i + 1 << "    " << setw(55) << left << usersArrayP[i] 
-                 << setw(55) << left << usersArrayPF[i] << setw(55) << left << usersArrayT[i]<< endl;
+            cout << i + 1 << "    " << setw(55) << left << clients[i].usernameP 
+                 << setw(55) << left << familyMember[i].usernamePF << setw(55) << left << counselor[i].usernamesT << endl;
         }
     }
+    
+    cout.unsetf(ios::left);
+    cout.unsetf(ios::right);
 
 }
 
@@ -1185,30 +1208,25 @@ int choiceValidatoin(string choice, char start, char end)
 }
 
 // Funtion Saves the data in a file when user Exits
-void saveData(
-    int patient[], char patientPriority[], string patientReview[], string usernamesP[], string passwordsP[], string patientGoals[][5], 
-    int familyMember[], string usernamesPF[], string passwordsPF[], string noteToPatient[], string noteToFamily[], 
-    int therapist[], string usernamesT[], string passwordsT[], string sessionDates[], string noteToTherapist[], 
-    int maxPatient, int maxFamily, int maxTherapist, int maxGoals
-)
+void saveData(patient clients[], family familyMember[], therapist counselor[])
 {
     ofstream fout ("Clients.csv");
     fout << "Client " << "," << "Password " << "," << "Prority "  << "," 
          << "Therapist Review "  << "," << "Note to Patient " << '\n';
-    for (int i = 0; i < maxPatient; i++) 
+    for (int i = 0; i < MAX_CLIENTS; i++) 
     {
-        fout << usernamesP[i] << "," << passwordsP[i] << "," << patientPriority[i] << ","
-             << patientReview[i] << "," << noteToPatient[i] << '\n' ;
+        fout << clients[i].usernameP << "," << clients[i].passwordsP << "," << clients[i].patientPriority << ","
+             << clients[i].patientReview << "," << clients[i].noteToPatient << '\n' ;
     }
     fout.close();
 
     fout.open("Client's Goals.csv");
-    for(int i = 0; i < maxPatient; i++)
+    for(int i = 0; i < MAX_CLIENTS; i++)
     {
-        fout << usernamesP[i] << ",";
-        for(int j = 0; j < maxGoals; j++)
+        fout << clients[i].usernameP << ",";
+        for(int j = 0; j < MAX_GOALS_PER_CLIENT; j++)
         {
-            fout << patientGoals[i][j] << ",";
+            fout << clients[i].patientGoals[j] << ",";
 
         }
         fout << '\n';
@@ -1218,18 +1236,18 @@ void saveData(
 
     fout.open("Client's Family.csv");
     fout << "Family Member "<< "," << "Password "  << "," << "Note by Patient" << '\n';
-    for (int i = 0; i < maxFamily; i++) 
+    for (int i = 0; i < MAX_FAMILY; i++) 
     {
-        fout << usernamesPF[i] << "," << passwordsPF[i] << "," << noteToFamily[i] << '\n' ;
+        fout << familyMember[i].usernamePF << "," << familyMember[i].passwordsPF << "," << familyMember[i].noteToFamily << '\n' ;
 
     }
     fout.close();
 
     fout.open("Therapists.csv");
     fout << "Therapist "<< "," << "Password "  << "," << "Session Dates" <<"," << "Note by Client's Fmamily" << '\n';
-    for (int i = 0; i < maxTherapist; i++) 
+    for (int i = 0; i < MAX_COUNSELOR; i++) 
     {
-        fout << usernamesT[i] << "," << passwordsT[i] << "," << sessionDates[i] << "," << noteToTherapist[i] << '\n' ;
+        fout << counselor[i].usernamesT << "," << counselor[i].passwordsT << "," << counselor[i].sessionDates << "," << counselor[i].noteToTherapist << '\n' ;
         
     }
     fout.close();
@@ -1238,12 +1256,7 @@ void saveData(
 }
 
 // loads the data from various files into the program arrays
-void loadData(
-    int patient[], char patientPriority[], string patientReview[], string usernamesP[], string passwordsP[], string patientGoals[][5], 
-    int familyMember[], string usernamesPF[], string passwordsPF[], string noteToPatient[], string noteToFamily[], 
-    int therapist[], string usernamesT[], string passwordsT[], string sessionDates[], string noteToTherapist[], 
-    int maxPatient, int maxFamily, int maxTherapist, int maxGoals
-)
+void loadData(patient clients[], family familyMember[], therapist counselor[])
  {
     ifstream fin;
 
@@ -1255,14 +1268,14 @@ void loadData(
     }
     fin.ignore(9999, '\n');
     int i = 0;
-    while (i < maxPatient && !fin.eof()) 
+    while (i < MAX_CLIENTS && !fin.eof()) 
     {
-        getline(fin, usernamesP[i], ',');
-        getline(fin, passwordsP[i], ',');
-        fin >> patientPriority[i];
+        getline(fin, clients[i].usernameP, ',');
+        getline(fin, clients[i].passwordsP, ',');
+        fin >> clients[i].patientPriority;
         fin.ignore();
-        getline(fin, patientReview[i], ',');
-        getline(fin, noteToPatient[i], '\n');
+        getline(fin, clients[i].patientReview, ',');
+        getline(fin, clients[i].noteToPatient, '\n');
         i++;
     }
     fin.close();
@@ -1275,13 +1288,14 @@ void loadData(
     }
     int j = 0;
     i = 0;
-    while (i < maxGoals && !fin.eof()) 
+    while (i < MAX_CLIENTS && !fin.eof()) 
     {
         fin.ignore(',');
         j = 0;
-        while (j < maxPatient && fin.peek() != '\n' ) 
+        while (j < MAX_GOALS_PER_CLIENT && fin.peek() != '\n' ) 
         {
-            getline(fin, patientGoals[i][j], ',');
+            getline(fin, clients[i].patientGoals[j], ',');
+            cout << j << "     ";
             j++;
             
         }
@@ -1299,11 +1313,11 @@ void loadData(
     }
     fin.ignore(9999, '\n');
     i = 0;
-    while (i < maxFamily && !fin.eof()) 
+    while (i < MAX_FAMILY && !fin.eof()) 
     {
-        getline(fin, usernamesPF[i], ',');
-        getline(fin, passwordsPF[i], ',');
-        getline(fin, noteToFamily[i], '\n');
+        getline(fin, familyMember[i].usernamePF, ',');
+        getline(fin, familyMember[i].passwordsPF, ',');
+        getline(fin, familyMember[i].noteToFamily, '\n');
         i++;
     }
     fin.close();
@@ -1316,12 +1330,12 @@ void loadData(
     }
     fin.ignore(9999, '\n');
     i = 0;
-    while (i < maxTherapist && !fin.eof()) 
+    while (i < MAX_COUNSELOR && !fin.eof()) 
     {
-        getline(fin, usernamesT[i], ',');
-        getline(fin, passwordsT[i], ',');
-        getline(fin, sessionDates[i], ',');
-        getline(fin, noteToTherapist[i], '\n');
+        getline(fin, counselor[i].usernamesT, ',');
+        getline(fin, counselor[i].passwordsT, ',');
+        getline(fin, counselor[i].sessionDates, ',');
+        getline(fin, counselor[i].noteToTherapist, '\n');
         i++;
     }
     fin.close();
